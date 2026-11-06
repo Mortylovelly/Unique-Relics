@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "unique_relics",
+  "version": "${version}",
+  "name": "Unique Relics",
+  "description": "A Fabric mod focused on unique and collectible relics. Gameplay features are not implemented yet.",
+  "authors": [
+    "Mortylovelly"
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.mortylovelly.uniquerelics.UniqueRelics"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
