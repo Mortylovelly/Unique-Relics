@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "ForgingScreenHandlerAccessor",
-    "SmithingScreenHandlerAccessor",
-    "ForgingScreenHandlerMixin"
+    "SmithingScreenHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
