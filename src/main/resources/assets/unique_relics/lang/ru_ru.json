@@ -1,4 +1,11 @@
 {
   "modmenu.nameTranslation.unique_relics": "Unique Relics",
-  "modmenu.descriptionTranslation.unique_relics": "Мод для создания уникальных и коллекционных реликвий."
+  "modmenu.descriptionTranslation.unique_relics": "Мод для создания уникальных и коллекционных реликвий.",
+  "tooltip.unique_relics.header": "УНИКАЛЬНАЯ РЕЛИКВИЯ",
+  "tooltip.unique_relics.template": "Шаблон: %s",
+  "tooltip.unique_relics.color": "Цвет: %s",
+  "tooltip.unique_relics.rarity": "Редкость: %s",
+  "tooltip.unique_relics.rarity.rare": "Редкая",
+  "tooltip.unique_relics.smith": "Сковал: %s",
+  "tooltip.unique_relics.date": "Дата ковки: %s"
 }
