@@ -10,12 +10,12 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.text.Text;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.random.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,7 +33,7 @@ import java.util.Optional;
  * replacing the item or overriding the recipe that produced it.
  */
 @Mixin(SmithingScreenHandler.class)
-public abstract class SmithingScreenHandlerMixin {
+public abstract class SmithingScreenHandlerMixin {\n    @Shadow\n    public abstract Slot getSlot(int index);
     @Shadow
     @Final
     private World world;
@@ -104,7 +104,7 @@ public abstract class SmithingScreenHandlerMixin {
             }
 
             RegistryEntry.Reference<ArmorTrimMaterial> chosen =
-                    choices.get(Random.create().nextInt(choices.size()));
+                    choices.get(ThreadLocalRandom.current().nextInt(choices.size()));
 
             this.uniqueRelics$cachedMaterialId = chosen.getKey()
                     .map(RegistryKey::getValue)
