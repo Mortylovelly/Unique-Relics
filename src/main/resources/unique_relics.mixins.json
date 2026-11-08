@@ -4,6 +4,7 @@
   "package": "com.mortylovelly.uniquerelics.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ForgingScreenHandlerAccessor",
     "SmithingScreenHandlerMixin"
   ],
   "injectors": {
