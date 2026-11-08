@@ -1,7 +1,9 @@
 package com.mortylovelly.uniquerelics.mixin;
 
 import com.mortylovelly.uniquerelics.UniqueRelics;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.trim.ArmorTrim;
 import net.minecraft.item.trim.ArmorTrimMaterial;
@@ -11,6 +13,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.screen.SmithingScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
@@ -29,8 +32,8 @@ import java.util.Optional;
 
 /**
  * Applies Unique Relics metadata to the actual smithing handler implementation.
- * The hook is intentionally limited to SmithingScreenHandler, so anvil
- * operations and other ForgingScreenHandler subclasses are not touched.
+ * Third-party tool-trim support is detected through Tool Trims' public item tags;
+ * the mod is not a compile-time dependency.
  */
 @Mixin(SmithingScreenHandler.class)
 public abstract class SmithingScreenHandlerMixin {
@@ -39,10 +42,21 @@ public abstract class SmithingScreenHandlerMixin {
     private World world;
 
     @Unique
+    private static final TagKey<Item> uniqueRelics$TOOLTRIMS_TOOLS =
+            TagKey.of(RegistryKeys.ITEM, new Identifier("tooltrims", "trimmable_tools"));
+
+    @Unique
+    private static final TagKey<Item> uniqueRelics$TOOLTRIMS_MATERIALS =
+            TagKey.of(RegistryKeys.ITEM, new Identifier("tooltrims", "tool_trim_materials"));
+
+    @Unique
     private String uniqueRelics$cachedInputSignature = "";
 
     @Unique
     private Identifier uniqueRelics$cachedMaterialId;
+
+    @Unique
+    private String uniqueRelics$lastToolDiagnosticSignature = "";
 
     @Inject(method = "updateResult", at = @At("TAIL"))
     private void uniqueRelics$applyRelicPreview(CallbackInfo ci) {
@@ -56,13 +70,20 @@ public abstract class SmithingScreenHandlerMixin {
         ItemStack addition = accessor.uniqueRelics$getInput().getStack(2);
         ItemStack result = accessor.uniqueRelics$getOutput().getStack(0);
 
-        if (template.isEmpty() || base.isEmpty() || addition.isEmpty() || result.isEmpty()) {
+        if (template.isEmpty() || base.isEmpty() || addition.isEmpty()) {
+            this.uniqueRelics$clearCachedRoll();
+            return;
+        }
+
+        if (result.isEmpty()) {
+            this.uniqueRelics$logToolTrimDiagnostic(template, base, addition, "no_recipe_result");
             this.uniqueRelics$clearCachedRoll();
             return;
         }
 
         Optional<ArmorTrim> currentTrim = ArmorTrim.getTrim(this.world.getRegistryManager(), result);
         if (currentTrim.isEmpty()) {
+            this.uniqueRelics$logToolTrimDiagnostic(template, base, addition, "result_has_no_trim");
             this.uniqueRelics$clearCachedRoll();
             return;
         }
@@ -133,6 +154,7 @@ public abstract class SmithingScreenHandlerMixin {
                     "The smithing result {} rejected a randomized ArmorTrim; leaving the recipe result intact.",
                     Registries.ITEM.getId(result.getItem())
             );
+            this.uniqueRelics$logToolTrimDiagnostic(template, base, addition, "trim_apply_rejected");
             this.uniqueRelics$clearCachedRoll();
             return;
         }
@@ -153,6 +175,8 @@ public abstract class SmithingScreenHandlerMixin {
         relicData.putString("material", this.uniqueRelics$cachedMaterialId.toString());
         relicData.putString("rarity", "rare");
         result.getOrCreateNbt().put("unique_relics", relicData);
+        this.uniqueRelics$hideVanillaTrimTooltip(result);
+        this.uniqueRelics$lastToolDiagnosticSignature = "";
     }
 
     @Inject(method = "onTakeOutput", at = @At("HEAD"))
@@ -190,6 +214,7 @@ public abstract class SmithingScreenHandlerMixin {
         relicData.putString("smith", player.getName().getString());
         relicData.putLong("forged_at", Instant.now().toEpochMilli());
         stack.getOrCreateNbt().put("unique_relics", relicData);
+        this.uniqueRelics$hideVanillaTrimTooltip(stack);
 
         UniqueRelics.LOGGER.info(
                 "Forged Unique Relic: item={}, template={}, pattern={}, material={}, smith={}",
@@ -201,6 +226,63 @@ public abstract class SmithingScreenHandlerMixin {
         );
 
         this.uniqueRelics$clearCachedRoll();
+        this.uniqueRelics$lastToolDiagnosticSignature = "";
+    }
+
+    @Unique
+    private void uniqueRelics$logToolTrimDiagnostic(
+            ItemStack template,
+            ItemStack base,
+            ItemStack addition,
+            String reason
+    ) {
+        if (!FabricLoader.getInstance().isModLoaded("tooltrims")) {
+            return;
+        }
+
+        Identifier templateId = Registries.ITEM.getId(template.getItem());
+        Identifier baseId = Registries.ITEM.getId(base.getItem());
+        Identifier additionId = Registries.ITEM.getId(addition.getItem());
+
+        boolean toolTemplate = "tooltrims".equals(templateId.getNamespace());
+        boolean vanillaArmorTemplate = "minecraft".equals(templateId.getNamespace())
+                && templateId.getPath().endsWith("_armor_trim_smithing_template");
+        boolean baseIsSupportedTool = base.isIn(uniqueRelics$TOOLTRIMS_TOOLS);
+
+        if (!toolTemplate && !(vanillaArmorTemplate && baseIsSupportedTool)) {
+            return;
+        }
+
+        String signature = templateId + "|" + baseId + "|" + additionId + "|" + reason;
+        if (signature.equals(this.uniqueRelics$lastToolDiagnosticSignature)) {
+            return;
+        }
+        this.uniqueRelics$lastToolDiagnosticSignature = signature;
+
+        boolean additionIsSupportedMaterial = addition.isIn(uniqueRelics$TOOLTRIMS_MATERIALS);
+        if (vanillaArmorTemplate && baseIsSupportedTool) {
+            UniqueRelics.LOGGER.warn(
+                    "Tool Trims check: {} has no tool-trim recipe for vanilla template {}. " +
+                            "Use one of Tool Trims' dedicated templates (linear, tracks, charge or frost). " +
+                            "base={}, addition={}.",
+                    reason, templateId, baseId, additionId
+            );
+            return;
+        }
+
+        UniqueRelics.LOGGER.warn(
+                "Tool Trims check: reason={}, template={}, base={}, base_in_tooltrims_tag={}, " +
+                        "addition={}, addition_in_tooltrims_materials_tag={}. " +
+                        "Tool Trims 1.1.0 only supplies recipes for its four dedicated templates.",
+                reason, templateId, baseId, baseIsSupportedTool,
+                additionId, additionIsSupportedMaterial
+        );
+    }
+
+    @Unique
+    private void uniqueRelics$hideVanillaTrimTooltip(ItemStack stack) {
+        NbtCompound root = stack.getOrCreateNbt();
+        root.putInt("HideFlags", root.getInt("HideFlags") | 128);
     }
 
     @Unique
