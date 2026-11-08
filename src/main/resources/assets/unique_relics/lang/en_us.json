@@ -1,4 +1,11 @@
 {
   "modmenu.nameTranslation.unique_relics": "Unique Relics",
-  "modmenu.descriptionTranslation.unique_relics": "A mod for unique and collectible relics."
+  "modmenu.descriptionTranslation.unique_relics": "A mod for unique and collectible relics.",
+  "tooltip.unique_relics.header": "UNIQUE RELIC",
+  "tooltip.unique_relics.template": "Template: %s",
+  "tooltip.unique_relics.color": "Color: %s",
+  "tooltip.unique_relics.rarity": "Rarity: %s",
+  "tooltip.unique_relics.rarity.rare": "Rare",
+  "tooltip.unique_relics.smith": "Forged by: %s",
+  "tooltip.unique_relics.date": "Forged: %s"
 }
