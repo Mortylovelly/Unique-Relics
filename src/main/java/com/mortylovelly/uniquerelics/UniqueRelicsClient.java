@@ -22,7 +22,7 @@ public final class UniqueRelicsClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
+        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
             if (!stack.hasNbt()) {
                 return;
             }
