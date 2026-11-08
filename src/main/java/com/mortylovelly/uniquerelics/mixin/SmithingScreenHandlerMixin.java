@@ -9,8 +9,8 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.inventory.CraftingResultInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.minecraft.nbt.NbtCompound;
@@ -33,7 +33,7 @@ import java.util.Optional;
  * replacing the item or overriding the recipe that produced it.
  */
 @Mixin(SmithingScreenHandler.class)
-public abstract class SmithingScreenHandlerMixin {\n    @Shadow\n    public abstract Slot getSlot(int index);
+public abstract class SmithingScreenHandlerMixin {
     @Shadow
     @Final
     private World world;
@@ -55,10 +55,14 @@ public abstract class SmithingScreenHandlerMixin {\n    @Shadow\n    public abst
             return;
         }
 
-        ItemStack template = this.getSlot(0).getStack();
-        ItemStack base = this.getSlot(1).getStack();
-        ItemStack addition = this.getSlot(2).getStack();
-        ItemStack output = this.getSlot(3).getStack();
+        ForgingScreenHandlerAccessor accessor = (ForgingScreenHandlerAccessor) (Object) this;
+        Inventory input = accessor.uniqueRelics$getInput();
+        CraftingResultInventory resultInventory = accessor.uniqueRelics$getOutput();
+
+        ItemStack template = input.getStack(0);
+        ItemStack base = input.getStack(1);
+        ItemStack addition = input.getStack(2);
+        ItemStack output = resultInventory.getStack(0);
 
         if (template.isEmpty() || base.isEmpty() || addition.isEmpty() || output.isEmpty()) {
             this.uniqueRelics$clearCachedRoll();
@@ -169,7 +173,8 @@ public abstract class SmithingScreenHandlerMixin {\n    @Shadow\n    public abst
             return;
         }
 
-        ItemStack template = this.getSlot(0).getStack();
+        ForgingScreenHandlerAccessor accessor = (ForgingScreenHandlerAccessor) (Object) this;
+        ItemStack template = accessor.uniqueRelics$getInput().getStack(0);
         Optional<ArmorTrim> appliedTrim = ArmorTrim.getTrim(player.getWorld().getRegistryManager(), stack);
 
         if (template.isEmpty() || appliedTrim.isEmpty()) {
