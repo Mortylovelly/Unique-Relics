@@ -11,6 +11,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.screen.SmithingScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.minecraft.nbt.NbtCompound;
