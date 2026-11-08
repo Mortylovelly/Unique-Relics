@@ -28,7 +28,7 @@ public final class UniqueRelicsClient implements ClientModInitializer {
             }
 
             NbtCompound root = stack.getNbt();
-            if (root == null || !root.contains("unique_relics", NbtCompound.class)) {
+            if (root == null || !root.contains("unique_relics")) {
                 return;
             }
 
