@@ -1,0 +1,274 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/sentry_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/dune_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/coast_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/wild_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/ward_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/eye_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/vex_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE006"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/tide_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE007"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/snout_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE008"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/rib_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE009"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/spire_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE00A"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/wayfinder_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE00B"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/shaper_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE00C"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/raiser_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE00D"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/host_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE00E"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/silence_armor_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE00F"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "tooltrims:item/linear_tool_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE010"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "tooltrims:item/tracks_tool_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE011"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "tooltrims:item/charge_tool_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE012"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "tooltrims:item/frost_tool_trim_smithing_template.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE013"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/quartz.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE020"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/iron_ingot.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE021"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/netherite_ingot.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE022"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/redstone.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE023"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/copper_ingot.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE024"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/gold_ingot.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE025"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/emerald.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE026"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/diamond.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE027"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/lapis_lazuli.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE028"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:item/amethyst_shard.png",
+      "height": 8,
+      "ascent": 7,
+      "chars": [
+        "\\uE029"
+      ]
+    }
+  ]
+}
