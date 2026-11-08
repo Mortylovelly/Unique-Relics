@@ -1,22 +1,23 @@
 package com.mortylovelly.uniquerelics.mixin;
 
 import com.mortylovelly.uniquerelics.UniqueRelics;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.CraftingResultInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.trim.ArmorTrim;
 import net.minecraft.item.trim.ArmorTrimMaterial;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.inventory.CraftingResultInventory;
-import net.minecraft.inventory.Inventory;
+import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.SmithingScreenHandler;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.entity.player.PlayerEntity;
-import java.util.concurrent.ThreadLocalRandom;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,14 +31,19 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Adds Unique Relics metadata to successful smithing-trim results without
- * replacing the item or overriding the recipe that produced it.
+ * Hooks the shared forging handler methods and limits the feature to the
+ * vanilla smithing table. This is intentional: updateResult and onTakeOutput
+ * are implemented by ForgingScreenHandler in Minecraft 1.20.1.
  */
-@Mixin(SmithingScreenHandler.class)
-public abstract class SmithingScreenHandlerMixin {
+@Mixin(ForgingScreenHandler.class)
+public abstract class ForgingScreenHandlerMixin {
     @Shadow
     @Final
-    private World world;
+    protected Inventory input;
+
+    @Shadow
+    @Final
+    protected CraftingResultInventory output;
 
     @Unique
     private String uniqueRelics$cachedInputSignature = "";
@@ -45,39 +51,35 @@ public abstract class SmithingScreenHandlerMixin {
     @Unique
     private Identifier uniqueRelics$cachedMaterialId;
 
-    /**
-     * Decorates the normal smithing preview only when the recipe output already
-     * contains a real ArmorTrim. Netherite upgrades and unrelated recipes are
-     * therefore left untouched.
-     */
     @Inject(method = "updateResult", at = @At("TAIL"))
     private void uniqueRelics$applyRelicPreview(CallbackInfo ci) {
-        if (this.world == null || this.world.isClient) {
+        if (!((Object) this instanceof SmithingScreenHandler)) {
             return;
         }
 
-        ForgingScreenHandlerAccessor accessor = (ForgingScreenHandlerAccessor) (Object) this;
-        Inventory input = accessor.uniqueRelics$getInput();
-        CraftingResultInventory resultInventory = accessor.uniqueRelics$getOutput();
+        World world = ((SmithingScreenHandlerAccessor) (Object) this).uniqueRelics$getWorld();
+        if (world == null || world.isClient) {
+            return;
+        }
 
-        ItemStack template = input.getStack(0);
-        ItemStack base = input.getStack(1);
-        ItemStack addition = input.getStack(2);
-        ItemStack output = resultInventory.getStack(0);
+        ItemStack template = this.input.getStack(0);
+        ItemStack base = this.input.getStack(1);
+        ItemStack addition = this.input.getStack(2);
+        ItemStack result = this.output.getStack(0);
 
-        if (template.isEmpty() || base.isEmpty() || addition.isEmpty() || output.isEmpty()) {
+        if (template.isEmpty() || base.isEmpty() || addition.isEmpty() || result.isEmpty()) {
             this.uniqueRelics$clearCachedRoll();
             return;
         }
 
-        Optional<ArmorTrim> currentTrim = ArmorTrim.getTrim(this.world.getRegistryManager(), output);
+        Optional<ArmorTrim> currentTrim = ArmorTrim.getTrim(world.getRegistryManager(), result);
         if (currentTrim.isEmpty()) {
             this.uniqueRelics$clearCachedRoll();
             return;
         }
 
         Registry<ArmorTrimMaterial> materialRegistry =
-                this.world.getRegistryManager().get(RegistryKeys.TRIM_MATERIAL);
+                world.getRegistryManager().get(RegistryKeys.TRIM_MATERIAL);
         List<RegistryEntry.Reference<ArmorTrimMaterial>> materials =
                 materialRegistry.streamEntries().toList();
 
@@ -109,7 +111,7 @@ public abstract class SmithingScreenHandlerMixin {
             }
 
             RegistryEntry.Reference<ArmorTrimMaterial> chosen =
-                    choices.get(ThreadLocalRandom.current().nextInt(choices.size()));
+                    choices.get(Random.create().nextInt(choices.size()));
 
             this.uniqueRelics$cachedMaterialId = chosen.getKey()
                     .map(RegistryKey::getValue)
@@ -137,10 +139,10 @@ public abstract class SmithingScreenHandlerMixin {
                 currentTrim.get().getPattern()
         );
 
-        if (!ArmorTrim.apply(this.world.getRegistryManager(), output, randomizedTrim)) {
+        if (!ArmorTrim.apply(world.getRegistryManager(), result, randomizedTrim)) {
             UniqueRelics.LOGGER.debug(
                     "The smithing result {} rejected a randomized ArmorTrim; leaving the vanilla result intact.",
-                    Registries.ITEM.getId(output.getItem())
+                    Registries.ITEM.getId(result.getItem())
             );
             this.uniqueRelics$clearCachedRoll();
             return;
@@ -161,22 +163,20 @@ public abstract class SmithingScreenHandlerMixin {
         relicData.putString("pattern", patternId.toString());
         relicData.putString("material", this.uniqueRelics$cachedMaterialId.toString());
         relicData.putString("rarity", "rare");
-        output.getOrCreateNbt().put("unique_relics", relicData);
+        result.getOrCreateNbt().put("unique_relics", relicData);
     }
 
-    /**
-     * Adds the player and real forge timestamp at the moment the result is
-     * actually taken, not while the result is merely being previewed.
-     */
     @Inject(method = "onTakeOutput", at = @At("HEAD"))
     private void uniqueRelics$recordForge(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
-        if (player.getWorld().isClient || stack.isEmpty()) {
+        if (!((Object) this instanceof SmithingScreenHandler)
+                || player.getWorld().isClient
+                || stack.isEmpty()) {
             return;
         }
 
-        ForgingScreenHandlerAccessor accessor = (ForgingScreenHandlerAccessor) (Object) this;
-        ItemStack template = accessor.uniqueRelics$getInput().getStack(0);
-        Optional<ArmorTrim> appliedTrim = ArmorTrim.getTrim(player.getWorld().getRegistryManager(), stack);
+        ItemStack template = this.input.getStack(0);
+        Optional<ArmorTrim> appliedTrim =
+                ArmorTrim.getTrim(player.getWorld().getRegistryManager(), stack);
 
         if (template.isEmpty() || appliedTrim.isEmpty()) {
             return;
